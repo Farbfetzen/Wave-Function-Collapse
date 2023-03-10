@@ -48,10 +48,10 @@ class Tile {
             candidate = candidates.toArray(TileImage[]::new)[random.nextInt(candidates.size())];
         }
         tileImage = candidate;
-        updateCandidates(neighbors);
+        pruneCandidates(neighbors);
     }
 
-    private void updateCandidates(final Neighbors neighbors) {
+    private void pruneCandidates(final Neighbors neighbors) {
         if (neighbors.top() != null) {
             neighbors.top().candidates.retainAll(tileImage.getCompatibleTop());
         }

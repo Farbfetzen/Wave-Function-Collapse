@@ -11,13 +11,16 @@ import processing.core.PApplet;
 
 public class WaveFunctionCollapse extends PApplet {
 
-    static final int TILE_SIZE = 100;
+    static final int TILE_SIZE = 10;
+    private static final int MILLIS_PER_STEP = 10;
     final Random random = new Random();
     private Tile[] tiles;
     private int gridWidth;
     private int gridHeight;
     private Set<TileImage> tileImages;
-    private boolean finished;
+    private boolean done;
+    private int previousMillis = 0;
+    private boolean animating = false;
 
     public static void main(final String[] args) {
         PApplet.main(WaveFunctionCollapse.class, args);
@@ -39,6 +42,14 @@ public class WaveFunctionCollapse extends PApplet {
 
     @Override
     public void draw() {
+        if (animating && !done) {
+            final int currentMillis = millis();
+            if (currentMillis - previousMillis >= MILLIS_PER_STEP) {
+                previousMillis += MILLIS_PER_STEP;
+                step();
+            }
+        }
+
         background(color(0, 0, 0));
         for (final Tile tile : tiles) {
             if (tile.isCollapsed()) {
@@ -52,12 +63,17 @@ public class WaveFunctionCollapse extends PApplet {
         if (key == 'r') {
             reset();
         } else if (key == ' ') {
+            animating = !animating;
+            if (animating) {
+                previousMillis = millis() - MILLIS_PER_STEP;
+            }
+        } else if (key == 's') {
             step();
         }
     }
 
     private void reset() {
-        finished = false;
+        done = false;
         tiles = new Tile[gridWidth * gridHeight];
         for (int x = 0; x < gridWidth; x++) {
             for (int y = 0; y < gridHeight; y++) {
@@ -65,23 +81,23 @@ public class WaveFunctionCollapse extends PApplet {
                 tiles[i] = new Tile(x, y, tileImages);
             }
         }
-        step();
     }
 
     private void step() {
-        final Tile tile = findNext();
-        if (tile == null) {
-            println("No more candidates available.");
-            finished = true;
+        final Tile nextTile = findNext();
+        if (nextTile == null) {
+            println("The algorithm either finished or ran out of candidates for at least one position.");
+            done = true;
             return;
         }
-        final Neighbors neighbors = getNonCollapsedNeighbors(tile.getGridX(), tile.getGridY());
-        tile.collapse(random, neighbors);
+        final Neighbors neighbors = getNonCollapsedNeighbors(nextTile.getGridX(), nextTile.getGridY());
+        nextTile.collapse(random, neighbors);
     }
 
     /**
      * Look for the tiles with the lowest number of candidates and return a random one from them.
      */
+    // TODO: It should be enough to only check the tiles at the frontier.
     Tile findNext() {
         int minNumberOfCandidates = Integer.MAX_VALUE;
         final List<Tile> nextTiles = new ArrayList<>();
