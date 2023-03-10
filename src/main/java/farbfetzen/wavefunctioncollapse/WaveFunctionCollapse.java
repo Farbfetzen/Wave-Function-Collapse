@@ -1,11 +1,23 @@
 package farbfetzen.wavefunctioncollapse;
 
+import static farbfetzen.wavefunctioncollapse.GridHelper.positionToIndex;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
 import processing.core.PApplet;
 
 public class WaveFunctionCollapse extends PApplet {
 
     static final int TILE_SIZE = 100;
-    Tile[] tiles;
+    final Random random = new Random();
+    private Tile[] tiles;
+    private int gridWidth;
+    private int gridHeight;
+    private Set<TileImage> tileImages;
+    private boolean finished;
 
     public static void main(final String[] args) {
         PApplet.main(WaveFunctionCollapse.class, args);
@@ -19,14 +31,93 @@ public class WaveFunctionCollapse extends PApplet {
 
     @Override
     public void setup() {
-        tiles = Tile.createTiles(this);
+        tileImages = TileImage.createTileImages(this);
+        gridWidth = width / TILE_SIZE;
+        gridHeight = height / TILE_SIZE;
+        reset();
     }
 
     @Override
     public void draw() {
         background(color(0, 0, 0));
-        for (int i = 0; i < tiles.length; i++) {
-            image(tiles[i].getImage(), (float) i * TILE_SIZE, 0);
+        for (final Tile tile : tiles) {
+            if (tile.isCollapsed()) {
+                image(tile.getTileImage().getImage(), tile.getDisplayX(), tile.getDisplayY());
+            }
         }
+    }
+
+    @Override
+    public void keyPressed() {
+        if (key == 'r') {
+            reset();
+        } else if (key == ' ') {
+            step();
+        }
+    }
+
+    private void reset() {
+        finished = false;
+        tiles = new Tile[gridWidth * gridHeight];
+        for (int x = 0; x < gridWidth; x++) {
+            for (int y = 0; y < gridHeight; y++) {
+                final int i = positionToIndex(x, y, gridWidth);
+                tiles[i] = new Tile(x, y, tileImages);
+            }
+        }
+        step();
+    }
+
+    private void step() {
+        final Tile tile = findNext();
+        if (tile == null) {
+            println("No more candidates available.");
+            finished = true;
+            return;
+        }
+        final Neighbors neighbors = getNonCollapsedNeighbors(tile.getGridX(), tile.getGridY());
+        tile.collapse(random, neighbors);
+    }
+
+    /**
+     * Look for the tiles with the lowest number of candidates and return a random one from them.
+     */
+    Tile findNext() {
+        int minNumberOfCandidates = Integer.MAX_VALUE;
+        final List<Tile> nextTiles = new ArrayList<>();
+        for (final Tile tile : tiles) {
+            if (tile.isCollapsed()) {
+                continue;
+            }
+            final int numberOfCandidates = tile.getCandidates().size();
+            if (numberOfCandidates == 0) {
+                // A non-collapsed tile with no candidates means either the algorithm has finished
+                // or it has reached a dead end.
+                return null;
+            }
+            if (numberOfCandidates == minNumberOfCandidates) {
+                nextTiles.add(tile);
+            } else if (numberOfCandidates < minNumberOfCandidates) {
+                minNumberOfCandidates = numberOfCandidates;
+                nextTiles.clear();
+                nextTiles.add(tile);
+            }
+        }
+        if (nextTiles.isEmpty()) {
+            return null;
+        }
+        if (nextTiles.size() == 1) {
+            return nextTiles.get(0);
+        }
+        return nextTiles.get(random.nextInt(nextTiles.size()));
+    }
+
+    Neighbors getNonCollapsedNeighbors(final int x, final int y) {
+        return new Neighbors(
+                y > 0 ? tiles[positionToIndex(x, y - 1, gridWidth)] : null,
+                x < gridWidth - 1 ? tiles[positionToIndex(x + 1, y, gridWidth)] : null,
+                y < gridHeight - 1 ? tiles[positionToIndex(x, y + 1, gridWidth)] : null,
+                x > 0 ? tiles[positionToIndex(x - 1, y, gridWidth)] : null
+        );
     }
 }
