@@ -8,4 +8,22 @@
     <artifactId>wave-function-collapse</artifactId>
     <version>1.0-SNAPSHOT</version>
 
+    <parent>
+        <groupId>farbfetzen</groupId>
+        <artifactId>parent</artifactId>
+        <version>1</version>
+    </parent>
+
+    <properties>
+        <mainClass>farbfetzen.wavefunctioncollapse.WaveFunctionCollapse</mainClass>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.processing</groupId>
+            <artifactId>core</artifactId>
+            <version>4.2</version>
+        </dependency>
+    </dependencies>
+
 </project>
