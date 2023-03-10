@@ -69,6 +69,10 @@ public class WaveFunctionCollapse extends PApplet {
             }
         } else if (key == 's') {
             step();
+        } else if (key == 'f') {
+            while (!done) {
+                step();
+            }
         }
     }
 
