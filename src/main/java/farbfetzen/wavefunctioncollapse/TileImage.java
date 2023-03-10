@@ -75,47 +75,29 @@ class TileImage {
 
     static Set<TileImage> createTileImages(final PApplet pApplet) {
         final Set<TileImage> tileImages = new HashSet<>();
-        final int colorA = pApplet.color(30, 120, 200);
-        final int colorB = pApplet.color(200, 110, 30);
-        int id = 0;
-
-        // empty
-        final int[] empty = new int[GRID_SIZE * GRID_SIZE];
-        Arrays.fill(empty, colorA);
-        tileImages.add(new TileImage(pApplet, ++id, empty));
-
-        // top
-        final int[] top = {
-                colorA, colorB, colorA,
-                colorB, colorB, colorB,
-                colorA, colorA, colorA
+        final int a = pApplet.color(30, 120, 200);
+        final int b = pApplet.color(200, 110, 30);
+        final int[][] tileTemplates = {
+                {a, a, a, a, a, a, a, a, a},
+                {a, b, a, b, b, b, a, a, a},
+                {a, b, a, a, b, b, a, b, a},
+                {a, a, a, b, b, b, a, b, a},
+                {a, b, a, b, b, a, a, b, a},
+                {a, b, a, a, b, b, a, a, a},
+                {a, a, a, a, b, b, a, b, a},
+                {a, a, a, b, b, a, a, b, a},
+                {a, b, a, b, b, a, a, a, a},
+                {a, b, a, a, b, a, a, a, a},
+                {a, a, a, a, b, b, a, a, a},
+                {a, a, a, a, b, a, a, b, a},
+                {a, a, a, b, b, a, a, a, a},
+                {a, b, a, b, b, b, a, b, a},
+                {a, b, a, a, b, a, a, b, a},
+                {a, a, a, b, b, b, a, a, a}
         };
-        tileImages.add(new TileImage(pApplet, ++id, top));
-
-        // right
-        final int[] right = {
-                colorA, colorB, colorA,
-                colorA, colorB, colorB,
-                colorA, colorB, colorA
-        };
-        tileImages.add(new TileImage(pApplet, ++id, right));
-
-        // bottom
-        final int[] bottom = {
-                colorA, colorA, colorA,
-                colorB, colorB, colorB,
-                colorA, colorB, colorA
-        };
-        tileImages.add(new TileImage(pApplet, ++id, bottom));
-
-        // left
-        final int[] left = {
-                colorA, colorB, colorA,
-                colorB, colorB, colorA,
-                colorA, colorB, colorA
-        };
-        tileImages.add(new TileImage(pApplet, ++id, left));
-
+        for (int i = 0; i < tileTemplates.length; i++) {
+            tileImages.add(new TileImage(pApplet, i, tileTemplates[i]));
+        }
         setCompatible(tileImages.toArray(TileImage[]::new));
         return tileImages;
     }

@@ -11,7 +11,7 @@ import processing.core.PApplet;
 
 public class WaveFunctionCollapse extends PApplet {
 
-    static final int TILE_SIZE = 10;
+    static final int TILE_SIZE = 20;
     private static final int MILLIS_PER_STEP = 10;
     final Random random = new Random();
     private Tile[] tiles;
